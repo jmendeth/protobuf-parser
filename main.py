@@ -1,23 +1,21 @@
 #!/usr/bin/env python
 
-from sys import stdin, argv
+import argparse
+from sys import argv
 from os.path import ismount, exists, join
 from runpy import run_path
 from lib.types import StandardParser
 
 # Parse arguments
-root_type = "root"
-if len(argv) >= 2: root_type = argv[1]
+parser = argparse.ArgumentParser(prog=argv[0],
+                                 description='Inspect protobuf files.')
+parser.add_argument('input', help='the file to inspect')
+parser.add_argument('-t', '--type', default='root', help='set root type')
+parser.add_argument('-c', '--config', help='provide config file')
+args = parser.parse_args(argv[1:])
 
 # Load the config
-config = {}
-directory = "."
-while not ismount(directory):
-    filename = join(directory, "protobuf_config.py")
-    if exists(filename):
-        config = run_path(filename)
-        break
-    directory = join(directory, "..")
+config = run_path(args.config) if args.config else {}
 
 # Create and initialize parser with config
 parser = StandardParser()
@@ -31,9 +29,9 @@ if "native_types" in config:
         parser.native_types[unicode(type)] = value
 
 # Make sure root type is defined and not compactable
-if root_type not in parser.types: parser.types[root_type] = {}
-parser.types[root_type]["compact"] = False
+if args.type not in parser.types: parser.types[args.type] = {}
+parser.types[args.type]["compact"] = False
 
 # PARSE!
-print(parser.safe_call(parser.match_handler("message"), stdin, root_type) + "\n")
+print(parser.safe_call(parser.match_handler("message"), open(args.input, 'rb'), args.type) + "\n")
 exit(1 if len(parser.errors_produced) else 0)

@@ -1,5 +1,5 @@
-from core import read_varint, read_value
-from parser import Parser, fg0, fg1, fg2, fg3, fg4, fg5, fg6, fg7, fg8, fg9, dim, bold
+from .core import read_varint, read_value
+from .parser import Parser, fg0, fg1, fg2, fg3, fg4, fg5, fg6, fg7, fg8, fg9, dim, bold
 from struct import unpack
 from io import BytesIO
 
@@ -39,8 +39,8 @@ class StandardParser(Parser):
             if not isinstance(field_entry, tuple): field_entry = (field_entry,)
             type = field_entry[0]
             field = field_entry[1]
-        except KeyError, e: pass
-        except IndexError, e: pass
+        except KeyError: pass
+        except IndexError: pass
         return (type, field)
 
     def parse_message(self, file, gtype, endgroup=None):
@@ -106,21 +106,21 @@ class StandardParser(Parser):
         # Attempt to decode message
         try:
             return self.parse_message(BytesIO(chunk), "message")
-        except Exception, e:
+        except Exception:
             pass
 
         # Attempt to decode packed repeated chunks
         try:
             if len(chunk) >= 5:
                 return self.parse_packed(BytesIO(chunk), "packed chunk")
-        except Exception, e:
+        except Exception:
             pass
 
         # Attempt to decode as UTF-8
         try:
             if self.is_probable_string(chunk.decode("utf-8")):
                 return self.parse_string(BytesIO(chunk), "string")
-        except UnicodeError, e:
+        except UnicodeError:
             pass
 
         # Fall back to hexdump

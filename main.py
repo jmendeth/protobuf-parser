@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from sys import stdin, argv
 from os.path import ismount, exists, join
@@ -35,5 +35,5 @@ if root_type not in parser.types: parser.types[root_type] = {}
 parser.types[root_type]["compact"] = False
 
 # PARSE!
-print parser.safe_call(parser.match_handler("message"), stdin, root_type) + "\n"
+print(parser.safe_call(parser.match_handler("message"), stdin, root_type) + "\n")
 exit(1 if len(parser.errors_produced) else 0)

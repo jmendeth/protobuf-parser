@@ -1,6 +1,7 @@
 from traceback import format_exc
-from core import read_varint, read_value
+from .core import read_varint, read_value
 from io import BytesIO
+from builtins import bytes
 
 # Implements the Parser class, which has the basic infrastructure for
 # storing types, calling them to parse, basic formatting and error handling.
@@ -38,7 +39,7 @@ class Parser(object):
     def to_display_compactly(self, type, lines):
         try:
             return self.types[type]["compact"]
-        except KeyError, e:
+        except KeyError:
             pass
 
         for line in lines:
@@ -52,7 +53,8 @@ class Parser(object):
         decorate = lambda i, x: \
             x if (mark is None or offset + i < mark) else dim(x)
         while True:
-            chunk = [ord(x) for x in file.read(self.bytes_per_line)]
+            # be careful about Python 2 vs 3 compatibility !
+            chunk = [ord(bytes([x])) for x in file.read(self.bytes_per_line)]
             if not len(chunk): break
             padded_chunk = chunk + [None] * max(0, self.bytes_per_line - len(chunk))
             hexdump = u" ".join("  " if x is None else decorate(i, u"%02X" % x) for i, x in enumerate(padded_chunk))
@@ -68,12 +70,12 @@ class Parser(object):
         try:
             chunk = x.read()
             x = BytesIO(chunk)
-        except Exception, e:
+        except Exception:
             pass
 
         try:
             return handler(x, *wargs)
-        except Exception, e:
+        except Exception as e:
             self.errors_produced.append(e)
             hex_dump = u"" if chunk is False else u"\n\n%s\n" % self.hex_dump(BytesIO(chunk), x.tell())[0]
             return u"%s: %s%s" % (fg1(u"ERROR"), self.indent(format_exc(e)).strip(), self.indent(hex_dump))
@@ -109,4 +111,4 @@ def dim(x):
 def genfg(n):
     globals()["fg%d" % n] = lambda x: fg(x, n)
     globals()["FG%d" % n] = lambda x: bold(fg(x, n))
-for i in xrange(10): genfg(i)
+for i in range(10): genfg(i)

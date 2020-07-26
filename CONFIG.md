@@ -81,6 +81,19 @@ After this, we get:
             1 <chunk> = "STARDUST"
             2 <varint> = 100
 
+If you would like to a dump a field to a file, perhaps because it contains bytes that are a file, then use `dump` as follows:
+
+~~~ python
+types = {
+  "root": {
+    1: "dump",
+    2: "dump",
+  },
+}
+~~~
+
+This dumps field 1 and field 2 to the files `dump.0` and `dump.1`. 
+
 Here's the list of native types supported:
 
 Wire type | Type | Description

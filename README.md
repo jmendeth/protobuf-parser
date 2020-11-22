@@ -78,7 +78,14 @@ There are some tricks you can use to save time when approaching a blob:
     
         ./main.py request < my-protobuf-blob
 
+### Convert to JSON
 
+Run code with JSON argument: `./main.py request <optional-type-name> -JSON < my-protobuf-blob` to create a simple JSON file of the parsed output.
+This works on output which does not have the parsing errors mentioned above.
+
+TODO:
+- Try to make more readable code
+- More tests to validate on edge cases
 
 [Google Protobuf]: https://developers.google.com/protocol-buffers
 [Wire format]: https://developers.google.com/protocol-buffers/docs/encoding

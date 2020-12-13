@@ -2,6 +2,8 @@ from .core import read_varint, read_identifier, read_value
 from .parser import Parser, fg0, fg1, fg2, fg3, fg4, fg5, fg6, fg7, fg8, fg9, dim, bold
 from struct import unpack
 from io import BytesIO
+from base64 import urlsafe_b64decode
+from urllib.parse import unquote
 
 # Code that implements and registers the usual native types (high
 # level parsing and formatting) into the barebones Parser.
@@ -120,6 +122,15 @@ class StandardParser(Parser):
         try:
             return self.parse_message(BytesIO(chunk), "message")
         except Exception:
+            pass
+
+        # Attempt to decode as urlencoded, possibly unpadded, (urlsafe-)base64 encoded message
+        try:
+            return "%s => base64 encoded %s" % (
+                fg2('"%s"' % chunk.decode('ascii')),
+                self.parse_message(BytesIO(urlsafe_b64decode(unquote(chunk) + "==")), "message")
+            )
+        except Exception as e:
             pass
 
         # Attempt to decode packed repeated chunks
